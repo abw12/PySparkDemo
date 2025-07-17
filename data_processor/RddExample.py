@@ -34,9 +34,13 @@ def calcAvgFrdsData(sc:SparkContext, filePath:str):
     rdd = file_data.map(parseData) # map the data to a specific format( rdd of (age,numFrds))
     totalsByAge = rdd.mapValues(lambda x: (x, int(1))).reduceByKey(lambda x,y: (x[0] + y[0], x[1] + y[1])) # (age = 33, numfrds = (387,2)) - suppose for age 33 we have two entries one with (385,1) and other with (2,1) => both adds up to (387,2) here 2 represent the num of occurences(count of age 33 appeared in the entire file)
     avgByAge  = totalsByAge.mapValues(lambda x: x[0] / x[1] )
-    results = avgByAge.collect()
-    for result in results:
+    results = avgByAge.collect() ## return a list of tuple(age, avg_frd)
+    # sort the list in reverse order by key (i.e age)
+    results_sorted = sorted(results, key = lambda x: x[0],reverse=True)
+    for result in results_sorted:
         print(result)
+
+
 
 def main():
     
