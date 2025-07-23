@@ -25,7 +25,7 @@ def create_spark_session():
         .getOrCreate() 
     )
 
-def read_data(spark, filename):
+def read_data(spark:SparkSession, filename):
     return spark.read.json(filename)
 
 def transform_data(df):
