@@ -1,5 +1,5 @@
 from pyspark.sql  import SparkSession
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame,Row
 from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, LongType
 
@@ -43,10 +43,44 @@ def simpleDataFrame(session:SparkSession):
     count_by_origin = session.sql("SELECT Origin, COUNT(*) as count FROM cars GROUP BY Origin")
     count_by_origin.show()
 
+def mapper(lines):
+    data = lines.split(',')
+    return Row(ID=int(data[0]), name=str(data[1].encode("utf-8")), age=int(data[2]), numFrds = int(data[3]))
+
+def fakeFriends(session:SparkSession):
+    friends_file_path = 'C:/Spark_learning/PySparkPractise/PySparkDemo/data/fakefriends.csv'
+
+    lines = session.sparkContext.textFile(friends_file_path);   
+    people = lines.map(mapper)
+
+    ## infer the schema and register the DataFrame as a temporary view(table)
+    schemaPeople = session.createDataFrame(people)
+    schemaPeople.createOrReplaceTempView("people")
+
+    # sql can run on the dataframe that have been registered as table (temp view)
+    teenagers = session.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
+
+    ## the result of sql query is RDD and support all the normal RDD operations
+    for teen in teenagers.collect():
+        print(teen)
+    
+    #we can also use functions to manipulate the DataFrame
+    schemaPeople.groupBy("age").count().orderBy("age").show()
+
+    # Example 1: Count total number of friends for each person
+    friends_count = schemaPeople.groupBy("name").sum("numFrds")
+    friends_count.show()
+    
+    # Example 2: Find the person with the maximum number of friends
+    max_friends = schemaPeople.orderBy(col("numFrds").desc()).limit(1)
+    max_friends.show()
+
 
 def main():
     spark = createSparkSession()
-    simpleDataFrame(spark)
+    # simpleDataFrame(spark)
+    fakeFriends(spark)
+
 
 
 if __name__ == "__main__":
