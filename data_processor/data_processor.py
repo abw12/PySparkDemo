@@ -96,14 +96,15 @@ def stock_value_to_tuple(stock_value):
 def main():
     spark: SparkSession = create_spark_session()
     
-    # df = read_data(spark, "./data/movies.json")
-    # transformed_df = transform_data(df)
-    # write_data(transformed_df, "./data/output_data")
-    # transformed_df.show()
+    df = read_data(spark, "./data/movies.json")
+    transformed_df = transform_data(df)
+    transformed_df.show()
+    # Todo not working fails while writing dataframe to output file
+    # write_data(transformed_df, "C:/Spark_learning/PySparkPractise/PySparkDemo/data/output/carsOutput.json")
     # getCarsDataFrame(spark,"./data/cars.json")
     # createNewDataFrame(spark)
     filePath: str = "./data/stocks.csv"
-    rddWorking(spark,filePath)
+    # rddWorking(spark,filePath)
 
 if __name__ == "__main__":
     main()
